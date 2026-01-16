@@ -1,0 +1,68 @@
+/* view_profile.css - Enlarged */
+
+.profile-container {
+    padding: 30px; /* Increased padding */
+}
+
+.profile-details {
+    margin-top: 30px; /* Increased margin */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.profile-info-container {
+    width: 70%; /* Adjust width for the left side */
+}
+
+.profile-photo-container {
+    width: 25%; /* Adjust width for the right side */
+    text-align: center;
+    border: 2px solid #ccc; /* Add border */
+    padding: 15px; /* Add padding inside the border */
+    border-radius: 10px; /* Optional: Add rounded corners */
+    background-color: #f9f9f9; /* Optional: Add a light background */
+
+}
+
+.profile-photo-container img {
+    width: 150px; /* Set image width */
+    height: 150px; /* Set image height */
+    border-radius: 50%; /* Make the image circular */
+    object-fit: cover; /* Ensure the image fits within the circle */
+    border: 2px solid #007bff; /* Add a border around the image */
+}
+
+.profile-info {
+    margin-bottom: 15px; /* Increased margin */
+}
+
+.profile-info label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em; /* Increased font size */
+    margin-bottom: 5px; /* Added spacing */
+}
+
+.profile-info input {
+    width: 400px; /* Increased width */
+    padding: 12px; /* Increased padding */
+    font-size: 1em; /* Increased font size */
+    border: 1.5px solid #ccc; /* Slightly thicker border */
+    border-radius: 6px; /* Slightly larger border radius */
+}
+
+#saveProfile {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px; /* Increased padding */
+    font-size: 1.1em; /* Increased font size */
+    border-radius: 6px; /* Increased border radius */
+    cursor: pointer;
+    margin-top: 20px; /* Added spacing */
+}
+
+#saveProfile:hover {
+    background-color: #0056b3;
+}

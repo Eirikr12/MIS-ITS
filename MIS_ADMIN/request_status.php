@@ -71,8 +71,20 @@ $all_result = $link->query("
     JOIN user_login u ON r.id = u.id
     JOIN employee_info e ON u.id = e.id
 ");
-?>
 
+// Approve Request Logic
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['approve_request_id'])) {
+    $request_id = $_POST['approve_request_id'];
+
+    $stmt = $link->prepare("UPDATE request_info SET request_status = 'Approved' WHERE request_id = ?");
+    $stmt->bind_param("i", $request_id);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: request_status.php");
+    exit();
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -83,68 +95,38 @@ $all_result = $link->query("
     <link rel="stylesheet" href="Admin Dashboard/style.css"/>
     <link rel="stylesheet" href="Request Status/request_status.css"/>
     <style>
-        .approve-btn, .reject-btn {
+        .approve-btn {
             border: none;
             color: white;
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 14px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .approve-btn {
             background-color: #28a745;
+            transition: background-color 0.3s ease;
         }
 
         .approve-btn:hover {
             background-color: #218838;
         }
 
-        .reject-btn {
-            background-color: #dc3545;
-        }
-
-        .reject-btn:hover {
-            background-color: #c82333;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
+        .request-table {
             width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            border-collapse: collapse;
         }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 30%;
-            border-radius: 8px;
+        .request-table th, .request-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .request-table th {
+            background-color: #f2f2f2;
         }
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
+        .cardHeader {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -164,19 +146,51 @@ $all_result = $link->query("
     </div>
 
     <div class="main">
+
         <div class="topbar">
             <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
             <div class="search">
                 <label>
                     <ion-icon name="search-outline"></ion-icon>
-                    <input type="text" id="searchInput" placeholder="Search by name or department..." onkeyup="filterTables()" />
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by name or email..." onkeyup="filterTables()" />
                 </label>
             </div>
-            <div class="user"><img src="../user.jpg" /></div>
+            <div class="user">
+                <img src="../user.jpg" />
+            </div>
+        </div>
+
+        <!-- All Requests Table -->
+        <div class="request-status-list">
+            <div class="cardHeader"><h2>All Requests</h2></div>
+            <table class="request-table">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th>Request Description</th>
+                        <th>Date Requested</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($row = $all_result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><?= htmlspecialchars($row['request_id']) ?></td>
+                            <td><?= htmlspecialchars($row['employee_name']) ?></td>
+                            <td><?= htmlspecialchars($row['department']) ?></td>
+                            <td><?= htmlspecialchars($row['request_description']) ?></td>
+                            <td><?= htmlspecialchars($row['request_date']) ?></td>
+                            <td><?= htmlspecialchars($row['request_status']) ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Pending Requests Table -->
-        <div class="request-status-list">
+        <div class="request-status-list" style="margin-top: 30px;">
             <div class="cardHeader"><h2>Pending Requests</h2></div>
             <table class="request-table">
                 <thead>
@@ -200,15 +214,10 @@ $all_result = $link->query("
                             <td><?= htmlspecialchars($row['request_date']) ?></td>
                             <td><?= htmlspecialchars($row['request_status']) ?></td>
                             <td>
-                                <form action="approve_request.php" method="POST" style="display:inline;">
-                                    <input type="hidden" name="request_id" value="<?= htmlspecialchars($row['request_id']) ?>">
-                                    <button type="submit" class="approve-btn">
-                                        <ion-icon name="checkmark-outline"></ion-icon> Approve
-                                    </button>
+                                <form method="POST">
+                                    <input type="hidden" name="approve_request_id" value="<?= htmlspecialchars($row['request_id']) ?>">
+                                    <button type="submit" class="approve-btn">Approve</button>
                                 </form>
-                                <button class="reject-btn" onclick="openRejectModal(<?= htmlspecialchars($row['request_id']) ?>)">
-                                    <ion-icon name="close-outline"></ion-icon> Reject
-                                </button>
                             </td>
                         </tr>
                     <?php } ?>
@@ -245,85 +254,39 @@ $all_result = $link->query("
             </table>
         </div>
 
-        <!-- All Requests Table -->
-        <div class="request-status-list" style="margin-top: 30px;">
-            <div class="cardHeader"><h2>All Requests</h2></div>
-            <table class="request-table">
-                <thead>
-                    <tr>
-                        <th>Request ID</th>
-                        <th>Employee Name</th>
-                        <th>Department</th>
-                        <th>Request Description</th>
-                        <th>Date Requested</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $all_result->fetch_assoc()) { ?>
-                        <tr>
-                            <td><?= htmlspecialchars($row['request_id']) ?></td>
-                            <td><?= htmlspecialchars($row['employee_name']) ?></td>
-                            <td><?= htmlspecialchars($row['department']) ?></td>
-                            <td><?= htmlspecialchars($row['request_description']) ?></td>
-                            <td><?= htmlspecialchars($row['request_date']) ?></td>
-                            <td><?= htmlspecialchars($row['request_status']) ?></td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeRejectModal()">&times;</span>
-        <h3>Reject Request</h3>
-        <form id="rejectForm" action="reject_request.php" method="POST">
-            <input type="hidden" name="request_id" id="rejectRequestId">
-            <label for="rejectReason">Reason for Rejection:</label>
-            <textarea name="reject_reason" id="rejectReason" rows="4" required></textarea>
-            <br><br>
-            <button type="submit" class="reject-btn">Submit</button>
-        </form>
-    </div>
-</div>
-
+<!-- Ionicons for icons -->
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
+<!-- Filtering and Toggle Menu Script -->
 <script>
-    document.querySelector(".toggle").onclick = () => {
-        document.querySelector(".navigation").classList.toggle("active");
-        document.querySelector(".main").classList.toggle("active");
-    };
+function filterTables() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const tables = document.querySelectorAll(".request-table tbody");
 
-    document.querySelectorAll(".navigation li").forEach(item =>
-        item.addEventListener("mouseover", function () {
-            document.querySelectorAll(".navigation li").forEach(i => i.classList.remove("hovered"));
-            this.classList.add("hovered");
-        })
-    );
-
-    function filterTables() {
-        const filter = document.getElementById("searchInput").value.toLowerCase();
-        document.querySelectorAll(".request-table tbody tr").forEach(row => {
-            const name = row.cells[1]?.textContent.toLowerCase();
-            const dept = row.cells[2]?.textContent.toLowerCase();
-            row.style.display = (name.includes(filter) || dept.includes(filter)) ? "" : "none";
+    tables.forEach(tbody => {
+        const rows = tbody.querySelectorAll("tr");
+        rows.forEach(row => {
+            const rowText = Array.from(row.querySelectorAll("td"))
+                .map(cell => cell.textContent.toLowerCase())
+                .join(" ");
+            row.style.display = rowText.includes(input) ? "" : "none";
         });
-    }
+    });
+}
 
-    function openRejectModal(requestId) {
-        document.getElementById("rejectRequestId").value = requestId;
-        document.getElementById("rejectModal").style.display = "block";
-    }
+// Toggle Menu
+let toggle = document.querySelector('.toggle');
+let navigation = document.querySelector('.navigation');
+let main = document.querySelector('.main');
 
-    function closeRejectModal() {
-        document.getElementById("rejectModal").style.display = "none";
-    }
+toggle.onclick = function () {
+    navigation.classList.toggle('active');
+    main.classList.toggle('active');
+};
 </script>
 
 </body>

@@ -2,44 +2,43 @@
 session_start();
 require_once "src/config.php";
 
-// Optional: Check if the user is admin
-// if ($_SESSION['position'] !== 'admin') {
-//     header("Location: unauthorized.php");
-//     exit();
-// }
+if (!isset($_GET['id'])) {
+    die("User ID is required.");
+}
 
-if (isset($_GET['id'])) {
-    $temp_id = intval($_GET['id']); // Sanitize the temporary user ID
+$id = intval($_GET['id']); // Sanitize the ID
 
-    // Step 1: Fetch the temporary user's details
-    $temp_query = "SELECT temporary_username, temporary_email, temporary_position 
-                   FROM temporary_login WHERE temporary_id = ?";
-    $temp_stmt = $link->prepare($temp_query);
-    $temp_stmt->bind_param("i", $temp_id);
-    $temp_stmt->execute();
-    $temp_stmt->bind_result($username, $email, $position);
-    $temp_stmt->fetch();
-    $temp_stmt->close();
+// Fetch user data from the registration_request table
+$query = "
+    SELECT 
+        r.user_id, 
+        r.status_id, 
+        r.email 
+    FROM registration_request r
+    WHERE r.user_id = ?
+";
+$stmt = $link->prepare($query);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
-    if (!empty($username)) {
-        // Step 2: Update the temporary user's status to "Approved" (status = 1)
-        $update_temp_query = "UPDATE temporary_login SET temporary_status = 1 WHERE temporary_id = ?";
-        $update_temp_stmt = $link->prepare($update_temp_query);
-        $update_temp_stmt->bind_param("i", $temp_id);
+if (!$user) {
+    die("User not found.");
+}
 
-        if ($update_temp_stmt->execute()) {
-            $update_temp_stmt->close();
+// Approve the user
+if ($user['status_id'] == 0) {
+    $stmt = $link->prepare("UPDATE registration_request SET status_id = 1, date_approved = NOW() WHERE user_id = ?");
+    $stmt->bind_param("i", $id);
 
-            // Redirect back to user_registration.php with a success message
-            header("Location: user_registration.php?msg=approved");
-            exit();
-        } else {
-            echo "Error updating temporary user status: " . $update_temp_stmt->error;
-            exit();
-        }
-    } else {
-        echo "Temporary user not found.";
+    if ($stmt->execute()) {
+        header("Location: user_registration.php?success=1");
         exit();
+    } else {
+        echo "Error approving user.";
     }
+} else {
+    echo "User is already approved or declined.";
 }
 ?>

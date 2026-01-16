@@ -1,0 +1,80 @@
+/* work_loads.css */
+
+.work-loads-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.work-loads-list table thead th {
+    background-color: #f0f0f0;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.work-loads-list table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.work-loads-list table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.work-loads-list table button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.work-loads-list table button:hover {
+    background-color: #0056b3;
+}
+
+.work-loads-list table td:last-child {
+    text-align: center;
+}
+
+.work-loads-list .cardHeader {
+    margin-bottom: 20px;
+}
+
+.work-loads-list .cardHeader h2 {
+    font-size: 1.8em;
+    color: var(--blue);
+}
+
+.work-loads-list {
+    padding: 20px;
+}
+
+/* Status Highlights */
+.work-loads-list table td.pending {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.work-loads-list table td.in-progress {
+    background-color: rgba(0, 100, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.work-loads-list table td.completed {
+    background-color: rgba(0, 128, 0, 0.2);
+    color: #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+}

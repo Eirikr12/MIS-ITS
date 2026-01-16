@@ -1,0 +1,135 @@
+/* Header section */
+.employee-registration .cardHeader {
+    margin-bottom: 20px;
+}
+
+.employee-registration .cardHeader h2 {
+    font-size: 1.8em;
+    color: var(--blue);
+}
+
+/* Form and history layout container */
+.content-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 20px;
+}
+
+/* Employee Registration Styles */
+.employee-registration {
+    width: 40%;
+}
+
+.add-user-form {
+    width: 100%;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.add-user-form .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.add-user-form .form-group label {
+    width: 120px;
+    font-weight: 600;
+}
+
+.add-user-form .form-group input,
+.add-user-form .form-group select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.add-user-form .form-group input:focus,
+.add-user-form .form-group select:focus {
+    border-color: #2ecc71;
+    outline: none;
+}
+
+.add-user-form input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-user-form input[type="submit"]:hover {
+    background-color: #27ae60;
+}
+
+/* Registration History Styles */
+.regitration-history {
+    width: 60%;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.regitration-history h2 {
+    color: #2ecc71;
+    margin-bottom: 15px;
+}
+
+.regitration-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.regitration-history th,
+.regitration-history td {
+    padding: 10px;
+    border: 2px solid #4c4c4c;
+    text-align: left;
+}
+
+/* Status Badges */
+.badge-approved {
+    color: green;
+    font-weight: bold;
+}
+
+.badge-pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.badge-declined {
+    color: red;
+    font-weight: bold;
+}
+
+/* Responsive Layout */
+@media (max-width: 992px) {
+    .content-flex {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .employee-registration,
+    .regitration-history {
+        width: 100%;
+    }
+
+    .add-user-form {
+        padding: 20px;
+    }
+}

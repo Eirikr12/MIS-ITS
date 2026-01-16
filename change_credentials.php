@@ -3,13 +3,13 @@ session_start();
 require_once "src/config.php";
 
 // Check if the user is a temporary account
-if (!isset($_SESSION["temp_id"]) || !isset($_SESSION["temp_username"]) || !isset($_SESSION["temp_position"])) {
+if (!isset($_SESSION["temporary_user_id"]) || !isset($_SESSION["temporary_username"]) || !isset($_SESSION["temp_position"])) {
     header("Location: login.php");
     exit();
 }
 
-$temp_id = $_SESSION["temp_id"];
-$temp_username = $_SESSION["temp_username"];
+$temp_id = $_SESSION["temporary_user_id"];
+$temp_username = $_SESSION["temporary_username"];
 $temp_position = $_SESSION["temp_position"];
 
 // Define variables and initialize with empty values
@@ -50,7 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
         // Retrieve temporary account details
-        $query = "SELECT temporary_fname, temporary_mname, temporary_lname, temporary_email, temporary_contact, temporary_department FROM temporary_login WHERE temporary_id = ?";
+        $query = "SELECT registration_request.f_name, registration_request.m_name, registration_request.l_name, 
+                         registration_request.email, registration_request.contact, registration_request.department_id 
+                  FROM registration_request 
+                  WHERE user_id = ?";
         $stmt = $link->prepare($query);
         $stmt->bind_param("i", $temp_id);
         $stmt->execute();
@@ -63,42 +66,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $current_time = date("H:i:s"); // Format: HH:MM:SS
 
             // Insert into user_login table
-            $insert_user_query = "INSERT INTO user_login (username, password, email, position, department, status, date_reg, time_reg) VALUES (?, ?, ?, ?, ?, 1, ?, ?)";
+            $insert_user_query = "INSERT INTO user_login (username, password, email, position, department, status, date_reg, user_session_id) VALUES (?, ?, ?, ?, ?, 1, ?, '')";
             $stmt = $link->prepare($insert_user_query);
-            $stmt->bind_param("sssssss", $new_username, $hashed_password, $email, $temp_position, $department, $current_date, $current_time);
+            $stmt->bind_param("ssssss", $new_username, $hashed_password, $email, $temp_position, $department, $current_date);
             if ($stmt->execute()) {
                 $user_id = $stmt->insert_id; // Get the newly inserted user ID
                 $stmt->close();
 
-                // Insert into the respective position-specific table
-                $insert_position_query = "";
+                // Insert into employee_info table
                 $default_display_picture = ""; // Default value for display_picture
-
-                switch ($temp_position) {
-                    case "admin":
-                        $insert_position_query = "INSERT INTO admin_info (id, admin_Fname, admin_Mname, admin_Lname, admin_contact, display_picture) VALUES (?, ?, ?, ?, ?, ?)";
-                        break;
-                    case "employee":
-                        $insert_position_query = "INSERT INTO employee_info (id, employee_fname, employee_mname, employee_lname, employee_contact, display_picture) VALUES (?, ?, ?, ?, ?, ?)";
-                        break;
-                    case "hr":
-                        $insert_position_query = "INSERT INTO hr_info (id, hr_fname, hr_mname, hr_lname, hr_contact, display_picture) VALUES (?, ?, ?, ?, ?, ?)";
-                        break;
-                    case "tech":
-                        $insert_position_query = "INSERT INTO tech_info (id, tech_fname, tech_mname, tech_lname, tech_contact, display_picture) VALUES (?, ?, ?, ?, ?, ?)";
-                        break;
-                }
-
-                if (!empty($insert_position_query)) {
-                    $stmt = $link->prepare($insert_position_query);
-                    $stmt->bind_param("isssss", $user_id, $fname, $mname, $lname, $contact, $default_display_picture);
-                    $stmt->execute();
-                    $stmt->close();
-                }
+                $insert_employee_query = "INSERT INTO employee_info (id, employee_fname, employee_mname, employee_lname, employee_contact, position_id, department_id, reg_status, display_picture) 
+                                          VALUES (?, ?, ?, ?, ?, ?, ?, 'Active', ?)";
+                $stmt = $link->prepare($insert_employee_query);
+                $stmt->bind_param("issssiss", $user_id, $fname, $mname, $lname, $contact, $temp_position, $department, $default_display_picture);
+                $stmt->execute();
+                $stmt->close();
 
                 // Delete the temporary account
-                $delete_query = "DELETE FROM temporary_login WHERE temporary_id = ?";
-                $stmt = $link->prepare($delete_query);
+                $delete_temp_query = "DELETE FROM temporary_log_in WHERE temp_user_id = ?";
+                $stmt = $link->prepare($delete_temp_query);
                 $stmt->bind_param("i", $temp_id);
                 $stmt->execute();
                 $stmt->close();

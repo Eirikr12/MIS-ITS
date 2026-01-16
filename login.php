@@ -50,32 +50,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate credentials
     if (empty($username_err) && empty($password_err)) {
         // Check if the user is a temporary account
-        $temp_query = "SELECT temporary_id, temporary_username, temporary_password, temporary_email, temporary_position, temporary_fname, temporary_mname, temporary_lname, temporary_status 
-                       FROM temporary_login WHERE temporary_username = ?";
+        $temp_query = "
+            SELECT 
+                t.temp_user_id, 
+                t.temp_username, 
+                t.temp_password, 
+                t.status_id AS temp_status_id, 
+                r.email, 
+                r.position_id, 
+                r.f_name, 
+                r.m_name, 
+                r.l_name, 
+                r.status_id AS reg_status_id
+            FROM temporary_log_in t
+            LEFT JOIN registration_request r ON t.temp_user_id = r.user_id
+            WHERE BINARY t.temp_username = ?
+        ";
         $temp_stmt = $link->prepare($temp_query);
         $temp_stmt->bind_param("s", $username);
         $temp_stmt->execute();
-        $temp_stmt->bind_result($temp_id, $temp_username, $temp_password, $temp_email, $temp_position, $temp_fname, $temp_mname, $temp_lname, $temp_status);
+        $temp_stmt->bind_result($temp_id, $temp_username, $temp_password, $temp_status_id, $temp_email, $temp_position, $temp_fname, $temp_mname, $temp_lname, $reg_status_id);
 
         if ($temp_stmt->fetch()) {
             $temp_stmt->close(); // Close the temporary statement to avoid "Commands out of sync" error
 
             // Check if the temporary account is approved
-            if ($temp_status == 0) {
+            if ($reg_status_id == 0) {
                 $login_err = "Your account is pending approval from the admin.";
-            } elseif (password_verify($password, $temp_password)) {
+            } elseif ($reg_status_id == 1 && password_verify($password, $temp_password)) {
                 // Check if this is the first login
-                if ($temp_status == 1) {
+                if ($temp_status_id == 0) {
                     // Set session variables for temporary accounts
-                    $_SESSION["temp_id"] = $temp_id;
-                    $_SESSION["temp_username"] = $temp_username;
+                    $_SESSION["temporary_user_id"] = $temp_id;
+                    $_SESSION["temporary_username"] = $temp_username;
                     $_SESSION["temp_position"] = $temp_position;
+                    $_SESSION["temp_email"] = $temp_email;
+                    $_SESSION["temp_fname"] = $temp_fname;
+                    $_SESSION["temp_mname"] = $temp_mname;
+                    $_SESSION["temp_lname"] = $temp_lname;
 
                     // Redirect to change_credentials.php
                     header("Location: change_credentials.php");
                     exit();
                 } else {
-                    $login_err = "Invalid temporary account status.";
+                    $login_err = "Your account has already been activated. Please contact the admin if you need assistance.";
                 }
             } else {
                 $login_err = "Invalid username or password.";
@@ -84,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $temp_stmt->close(); // Close the temporary statement if no results are found
 
             // Check if the user is a regular account
-            $query = "SELECT id, username, password, position, status FROM user_login WHERE username = ?";
+            $query = "SELECT id, username, password, position, status FROM user_login WHERE BINARY username = ?";
             $stmt = $link->prepare($query);
             $stmt->bind_param("s", $username);
             $stmt->execute();
@@ -112,16 +130,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     // Redirect based on the user's position
                     switch ($position) {
-                        case "admin":
+                        case "admin": case 1:
                             header("Location: MIS_ADMIN/dashboard.php");
                             break;
-                        case "employee":
+                        case "employee": case 4:
                             header("Location: MIS_EMPLOYEE/dashboard.php");
                             break;
-                        case "hr":
+                        case "hr": case 3:
                             header("Location: MIS_HR/dashboard.php");
                             break;
-                        case "tech":
+                        case "tech": case 2:
                             header("Location: MIS_TECH/dashboard.php");
                             break;
                         default:
@@ -166,6 +184,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <body>
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="login-form">
+        <?php if (!empty($login_err)): ?>
+            <div class="error-message">
+                <?= htmlspecialchars($login_err) ?>
+            </div>
+        <?php endif; ?>
         <div class="flex-row">
             <label class="lf--label" for="username">
                 <svg x="0px" y="0px" width="12px" height="13px">
@@ -175,9 +198,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </label>
             <input id="username" name="username"
                 class="lf--input <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" placeholder="Username"
-                type="text" value="<?php echo $username; ?>">
-            <span class="invalid-feedback"><?php echo $username_err; ?></span>
+                type="text" value="<?php echo htmlspecialchars($username); ?>">
         </div>
+        <?php if (!empty($username_err)): ?>
+            <div class="error-message">
+                <?= htmlspecialchars($username_err) ?>
+            </div>
+        <?php endif; ?>
+
         <div class="flex-row">
             <label class="lf--label" for="password">
                 <svg x="0px" y="0px" width="15px" height="5px">
@@ -190,10 +218,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input id="password" name="password"
                 class="lf--input <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" placeholder="Password"
                 type="password">
-            <span class="invalid-feedback"><?php echo $password_err; ?></span>
         </div>
+        <?php if (!empty($password_err)): ?>
+            <div class="error-message">
+                <?= htmlspecialchars($password_err) ?>
+            </div>
+        <?php endif; ?>
         <input class="lf--submit" type="submit" value="LOGIN">
-        <?php if (!empty($login_err)) echo "<p>$login_err</p>"; ?>
     </form>
 </body>
 

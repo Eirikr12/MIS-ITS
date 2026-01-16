@@ -1,0 +1,134 @@
+/* General container styling */
+.profile-container {
+    padding: 30px;
+    background-color: #ffffff; /* White background for the profile section */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for a card effect */
+    margin: 20px auto;
+    max-width: 900px; /* Center the profile section */
+}
+
+/* Profile details layout */
+.profile-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px; /* Add spacing between the two sections */
+}
+
+/* Left side: Profile information */
+.profile-info-container {
+    width: 65%;
+}
+
+/* Right side: Profile photo */
+.profile-photo-container {
+    width: 30%;
+    text-align: center;
+    border: 2px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.profile-photo-container img {
+    width: 250px; /* Increased width */
+    height: 250px; /* Increased height */
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff; /* Blue border */
+    margin-bottom: 10px;
+}
+
+/* Profile information fields */
+.profile-info {
+    margin-bottom: 15px;
+}
+
+.profile-info label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    color: #333; /* Darker text for labels */
+}
+
+.profile-info input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    background-color: #f5f5f5; /* Light gray background for inputs */
+    color: #333;
+}
+
+.profile-info input:focus {
+    border-color: #007bff; /* Blue border on focus */
+    outline: none;
+    background-color: #ffffff; /* White background on focus */
+}
+
+/* Buttons */
+button {
+    display: inline-block;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+button:focus {
+    outline: none;
+}
+
+/* Success and error messages */
+.message {
+    margin-top: 20px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1em;
+    text-align: center;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .profile-details {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-info-container,
+    .profile-photo-container {
+        width: 100%;
+    }
+
+    .profile-photo-container img {
+        width: 200px; /* Adjusted for smaller screens */
+        height: 200px; /* Adjusted for smaller screens */
+    }
+}

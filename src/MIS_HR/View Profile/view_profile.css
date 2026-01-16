@@ -1,0 +1,44 @@
+/* view_profile.css - Enlarged */
+
+.profile-container {
+    padding: 30px; /* Increased padding */
+}
+
+.profile-container .cardHeader h2{
+    font-size: 40px;
+}
+
+.profile-info {
+    margin-bottom: 15px;
+    margin-top: 30px; /* Increased margin */
+}
+
+.profile-info label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em; /* Increased font size */
+    margin-bottom: 5px; /* Added spacing */
+}
+
+.profile-info input {
+    width: 400px; /* Increased width */
+    padding: 12px; /* Increased padding */
+    font-size: 1em; /* Increased font size */
+    border: 1.5px solid #ccc; /* Slightly thicker border */
+    border-radius: 6px; /* Slightly larger border radius */
+}
+
+#saveProfile {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px; /* Increased padding */
+    font-size: 1.1em; /* Increased font size */
+    border-radius: 6px; /* Increased border radius */
+    cursor: pointer;
+    margin-top: 20px; /* Added spacing */
+}
+
+#saveProfile:hover {
+    background-color: #0056b3;
+}

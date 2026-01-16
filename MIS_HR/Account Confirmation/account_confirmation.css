@@ -1,0 +1,95 @@
+/* request_status.css */
+
+.account-confirmation-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.account-confirmation-list table thead th {
+    background-color: #f0f0f0;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.account-confirmation-list table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.account-confirmation-list table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.account-confirmation-list .cardHeader {
+    margin-bottom: 20px;
+}
+
+.account-confirmation-list .cardHeader h2 {
+    font-size: 1.8em;
+    color: var(--blue);
+}
+
+.account-confirmation-list {
+    padding: 20px;
+}
+
+.account-confirmation-list table td.pending {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.account-confirmation-list table td.in-progress {
+    background-color: rgba(0, 0, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.account-confirmation-list table td.completed {
+    background-color: rgba(0, 128, 0, 0.2);
+    color: #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.request-edit {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.request-edit:hover {
+    background-color: #218838;
+}
+
+.request-edit ion-icon {
+    font-size: 16px;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    margin: 20px auto;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    width: 90%;
+    text-align: center;
+    font-size: 16px;
+}

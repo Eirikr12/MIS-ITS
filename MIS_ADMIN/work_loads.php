@@ -30,24 +30,28 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Fetch only approved work load data with assigned technician
+// Fetch only approved work load data
 $query = "
     SELECT 
-        request_info.request_id,
-        request_info.request_description,
-        CONCAT(employee_info.employee_fname, ' ', employee_info.employee_lname) AS employee_name,
-        tech_info.id AS tech_id,
-        CONCAT(tech_info.tech_fname, ' ', tech_info.tech_lname) AS assigned_to
-    FROM request_info
-    LEFT JOIN employee_info ON request_info.id = employee_info.id
-    LEFT JOIN tech_info ON request_info.id = tech_info.id
-    WHERE request_info.request_status = 'Approved'
+        r.request_id,
+        r.request_description,
+        CONCAT(ei.employee_fname, ' ', ei.employee_lname) AS employee_name,
+        ul.username AS technician_name,
+        r.request_status
+    FROM request_info r
+    LEFT JOIN employee_info ei ON r.id = ei.id
+    LEFT JOIN user_login ul ON ul.position = 'tech' AND ul.status = 1
+    WHERE r.request_status = 'Approved'
 ";
 $result = $link->query($query);
 
 // Fetch technician list
-$technicians_query = "SELECT id, CONCAT(tech_fname, ' ', tech_lname) AS tech_name FROM tech_info";
-$technicians_result = $link->query($technicians_query);
+$query_technicians = "
+    SELECT id, username AS tech_name
+    FROM user_login
+    WHERE position = 'tech' AND status = 1
+";
+$technicians_result = $link->query($query_technicians);
 $technicians = [];
 while ($tech = $technicians_result->fetch_assoc()) {
     $technicians[] = $tech;
@@ -61,6 +65,30 @@ while ($tech = $technicians_result->fetch_assoc()) {
     <title>MIS-ADMIN - Work Loads</title>
     <link rel="stylesheet" href="Admin Dashboard/style.css" />
     <link rel="stylesheet" href="Work Loads/work_loads.css" />
+
+    <!-- Highlighted Change: Added CSS for column lines -->
+    <style>
+        /* Add column lines to tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Highlighted Change: Added border for column lines */
+        table th, table td {
+            border: 1px solid #ddd; /* Add column lines */
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        .cardHeader {
+            margin-bottom: 20px;
+        }
+    </style>
 
     <!-- Prevent back button behavior -->
     <script>
@@ -109,6 +137,7 @@ while ($tech = $technicians_result->fetch_assoc()) {
                             <th>Employee Name</th>
                             <th>Description</th>
                             <th>Assigned To</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -119,17 +148,18 @@ while ($tech = $technicians_result->fetch_assoc()) {
                                 <td><?= htmlspecialchars($row['employee_name']) ?></td>
                                 <td><?= htmlspecialchars($row['request_description']) ?></td>
                                 <td>
-                                    <?= htmlspecialchars($row['assigned_to']) ?: '' ?>
+                                    <?= htmlspecialchars($row['technician_name']) ?: 'Unassigned' ?>
                                     <br />
                                     <select onchange="assignWorkLoad(<?= $row['request_id'] ?>, this.value)">
                                         <option value="">Select Technician</option>
                                         <?php foreach ($technicians as $tech) { ?>
-                                            <option value="<?= $tech['id'] ?>" <?= $row['tech_id'] == $tech['id'] ? 'selected' : '' ?>>
+                                            <option value="<?= $tech['id'] ?>">
                                                 <?= htmlspecialchars($tech['tech_name']) ?>
                                             </option>
                                         <?php } ?>
                                     </select>
                                 </td>
+                                <td><?= htmlspecialchars($row['request_status']) ?></td>
                                 <td>
                                     <form method="post" action="approve_request.php">
                                         <input type="hidden" name="request_id" value="<?= htmlspecialchars($row['request_id']) ?>">
@@ -148,6 +178,12 @@ while ($tech = $technicians_result->fetch_assoc()) {
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script>
+        // Hamburger menu toggle functionality
+        document.querySelector('.toggle').addEventListener('click', () => {
+            document.querySelector('.navigation').classList.toggle('active');
+            document.querySelector('.main').classList.toggle('active');
+        });
+
         function assignWorkLoad(requestId, techId) {
             if (!techId) return;
             // Send AJAX request to assign technician
@@ -166,6 +202,33 @@ while ($tech = $technicians_result->fetch_assoc()) {
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        // Search filtering function
+        function filterWorkLoads() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('workLoadsList');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                let found = false;
+                const cells = rows[i].getElementsByTagName('td');
+                
+                // Check each cell in the row (except the last one with action buttons)
+                for (let j = 0; j < cells.length - 1; j++) {
+                    const cell = cells[j];
+                    if (cell) {
+                        const txtValue = cell.textContent || cell.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                rows[i].style.display = found ? '' : 'none';
+            }
         }
     </script>
 </body>

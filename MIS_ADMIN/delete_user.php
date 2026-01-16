@@ -1,79 +1,42 @@
 <?php
-require_once "src/config.php"; // Database connection
+require_once "src/config.php";
 
-// Ensure an ID is provided
-if (!isset($_GET['id']) || empty($_GET['id'])) {
-    die("Error: No user ID provided.");
+if (!isset($_GET['id'])) {
+    die("User ID is required.");
 }
 
-$id = intval($_GET['id']); // Always sanitize ID inputs
+$id = intval($_GET['id']); // Sanitize the ID
 
-// Step 1: Fetch the user's position from user_login
-$position_query = "SELECT position FROM user_login WHERE id = ?";
-$position_stmt = $link->prepare($position_query);
-$position_stmt->bind_param("i", $id);
-$position_stmt->execute();
-$position_stmt->bind_result($position);
-$position_stmt->fetch();
-$position_stmt->close();
+// Fetch user data from the registration_request table
+$query = "
+    SELECT 
+        r.user_id, 
+        r.status_id 
+    FROM registration_request r
+    WHERE r.user_id = ?
+";
+$stmt = $link->prepare($query);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
-// Step 2: Delete related data based on the user's position
-switch ($position) {
-    case "admin":
-        $stmt = $link->prepare("DELETE FROM admin_info WHERE id = ?");
-        break;
-    case "tech":
-        $stmt = $link->prepare("DELETE FROM tech_info WHERE id = ?");
-        break;
-    case "employee":
-        $stmt = $link->prepare("DELETE FROM employee_info WHERE id = ?");
-        break;
-    case "hr":
-        $stmt = $link->prepare("DELETE FROM hr_info WHERE id = ?");
-        break;
-    default:
-        $stmt = null;
-        break;
+if (!$user) {
+    die("User not found.");
 }
 
-if ($stmt) {
+// Decline the user
+if ($user['status_id'] == 0) {
+    $stmt = $link->prepare("UPDATE registration_request SET status_id = 2, date_declined = NOW() WHERE user_id = ?");
     $stmt->bind_param("i", $id);
-    if (!$stmt->execute()) {
-        echo "Error deleting related position-specific info: " . $stmt->error;
+
+    if ($stmt->execute()) {
+        header("Location: user_registration.php?msg=declined");
         exit();
+    } else {
+        echo "Error declining user.";
     }
-    $stmt->close();
-}
-
-// Step 3: Delete related data in request_info
-$stmt_request = $link->prepare("DELETE FROM request_info WHERE id = ?");
-$stmt_request->bind_param("i", $id);
-
-if (!$stmt_request->execute()) {
-    echo "Error deleting related request info: " . $stmt_request->error;
-    exit();
-}
-$stmt_request->close();
-
-// Step 4: Delete related data in temporary_login
-$stmt2 = $link->prepare("DELETE FROM temporary_login WHERE temporary_id = ?");
-$stmt2->bind_param("i", $id);
-
-if (!$stmt2->execute()) {
-    echo "Error deleting related temporary login info: " . $stmt2->error;
-    exit();
-}
-$stmt2->close();
-
-// Step 5: Delete from user_login
-$stmt3 = $link->prepare("DELETE FROM user_login WHERE id = ?");
-$stmt3->bind_param("i", $id);
-
-if ($stmt3->execute()) {
-    $stmt3->close();
-    header("Location: user_registration.php?msg=deleted");
-    exit();
 } else {
-    echo "Error deleting user: " . $stmt3->error;
+    echo "User is already approved or declined.";
 }
 ?>

@@ -1,0 +1,134 @@
+/* request_status.css */
+
+.request-status-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.request-status-list table thead th {
+    background-color: #f0f0f0;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.request-status-list table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.request-status-list table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.request-status-list .cardHeader {
+    margin-bottom: 20px;
+}
+
+.request-status-list .cardHeader h2 {
+    font-size: 1.8em;
+    color: var(--blue);
+}
+
+.request-status-list {
+    padding: 20px;
+}
+
+.request-status-list table td.pending {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.request-status-list table td.in-progress {
+    background-color: rgba(0, 0, 255, 0.2);
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.request-status-list table td.completed {
+    background-color: rgba(0, 128, 0, 0.2);
+    color: #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+/* Form Container */
+.form-container {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 15px auto;
+    font-family: Arial, sans-serif;
+}
+
+/* Form Heading */
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+/* Input Fields */
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Textarea */
+.form-group textarea {
+    resize: none;
+}
+
+/* Submit Button */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #ec4d0ed2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn:hover {
+    background-color: #151618;
+}
+
+/* Success/Error Message */
+.form-container p {
+    text-align: center;
+    font-size: 14px;
+    color: #28a745; /* Green for success */
+    margin-top: 10px;
+}

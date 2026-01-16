@@ -34,33 +34,43 @@ header("Expires: 0"); // Proxies
 
 $user_session_id = $_SESSION['id'];
 
-// Fetch user details including the display_picture
+// Fetch user details including the position name and department name
 $query = "
   SELECT 
     ul.username, 
     ul.email, 
-    ul.position, 
-    ai.admin_Fname, 
-    ai.admin_Mname, 
-    ai.admin_Lname, 
-    ai.display_picture 
+    p.position_name AS position, 
+    d.department_name AS department, 
+    ei.employee_fname, 
+    ei.employee_mname, 
+    ei.employee_lname, 
+    ei.display_picture 
   FROM 
     user_login ul
   LEFT JOIN 
-    admin_info ai 
+    employee_info ei 
   ON 
-    ul.id = ai.id 
+    ul.id = ei.id 
+  LEFT JOIN 
+    position_info p 
+  ON 
+    ei.position_id = p.position_id 
+  LEFT JOIN 
+    department_info d 
+  ON 
+    ei.department_id = d.department_id 
   WHERE 
-    ul.id = ?";
+    ul.id = ?
+";
 $stmt = $link->prepare($query);
 $stmt->bind_param("s", $user_session_id);
 $stmt->execute();
-$stmt->bind_result($username, $email, $position, $first_name, $middle_name, $last_name, $display_picture);
+$stmt->bind_result($username, $email, $position, $department, $first_name, $middle_name, $last_name, $display_picture);
 $stmt->fetch();
 $stmt->close();
 
 // If no display picture is set, use a default image
-$profile_photo = !empty($display_picture) ? $display_picture : "../default_user.jpg";
+$profile_photo = !empty($display_picture) ? "uploads/" . $display_picture : "../default_user.jpg";
 ?>
 
 <!DOCTYPE html>
@@ -184,6 +194,12 @@ $profile_photo = !empty($display_picture) ? $display_picture : "../default_user.
                                 <label for="position">Position:</label>
                                 <input type="text" name="position" id="position"
                                     value="<?php echo htmlspecialchars($position); ?>" readonly />
+                            </div>
+
+                            <div class="profile-info">
+                                <label for="department">Department:</label>
+                                <input type="text" name="department" id="department"
+                                    value="<?php echo htmlspecialchars($department); ?>" readonly />
                             </div>
 
                             <div class="profile-info">

@@ -1,0 +1,74 @@
+/* user_registration_table.css */
+
+.user-approval-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.user-approval-list table thead th {
+    background-color: #f0f0f0;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.user-approval-list table td.pending {
+    background-color: rgba(255, 255, 0, 0.3); /* Light Yellow with Transparency */
+    border-radius: 4px; /* Optional: Rounded corners */
+    padding: 4px 8px; /* Add padding for better spacing */
+}
+
+.user-approval-list table td.approved {
+    background-color: rgba(0, 128, 0, 0.2); /* Light Green with Transparency */
+    color: #333; /* Darker text for readability */
+    border-radius: 4px; /* Optional: Rounded corners */
+    padding: 4px 8px; /* Add padding for better spacing */
+}
+
+.user-approval-list table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.user-approval-list table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.user-approval-list table button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.user-approval-list table button:hover {
+    background-color: #0056b3;
+}
+
+.user-approval-list table td:last-child {
+    text-align: center;
+}
+
+.user-approval-list .cardHeader {
+    margin-bottom: 20px;
+}
+
+.user-approval-list .cardHeader h2 {
+    font-size: 1.8em;
+    color: var(--blue);
+}
+
+.user-approval-list {
+    padding: 20px;
+}
+

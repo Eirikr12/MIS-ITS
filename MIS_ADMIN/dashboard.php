@@ -414,21 +414,13 @@ document.getElementById('refresh-btn')?.addEventListener('click', updateDashboar
                     SELECT 
                         user_login.id,
                         user_login.status,
-                        user_login.position,
-                        user_login.department,
-                        CASE 
-                            WHEN user_login.position = 'admin' THEN CONCAT(admin_info.admin_Fname, ' ', admin_info.admin_Lname)
-                            WHEN user_login.position = 'employee' THEN CONCAT(employee_info.employee_fname, ' ', employee_info.employee_lname)
-                            WHEN user_login.position = 'hr' THEN CONCAT(hr_info.hr_fname, ' ', hr_info.hr_lname)
-                            WHEN user_login.position = 'tech' THEN CONCAT(tech_info.tech_fname, ' ', tech_info.tech_lname)
-                            ELSE 'Unknown'
-                        END AS employee_name
+                        CONCAT(employee_info.employee_fname, ' ', employee_info.employee_mname, ' ', employee_info.employee_lname) AS employee_name,
+                        position_info.position_name AS position,
+                        department_info.department_name AS department
                     FROM user_login
-                    LEFT JOIN admin_info ON user_login.id = admin_info.id
                     LEFT JOIN employee_info ON user_login.id = employee_info.id
-                    LEFT JOIN hr_info ON user_login.id = hr_info.id
-                    LEFT JOIN tech_info ON user_login.id = tech_info.id
-                    GROUP BY user_login.id
+                    LEFT JOIN position_info ON employee_info.position_id = position_info.position_id
+                    LEFT JOIN department_info ON employee_info.department_id = department_info.department_id
                 ";
               $result = $link->query($query);
 

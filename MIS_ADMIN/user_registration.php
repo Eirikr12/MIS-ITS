@@ -55,6 +55,21 @@ while ($row = $result->fetch_assoc()) {
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        .cardHeader {
+            margin-bottom: 20px;
+        }
         .action-buttons a {
             margin: 2px;
             padding: 5px 10px;
@@ -123,7 +138,9 @@ while ($row = $result->fetch_assoc()) {
     <!-- Main -->
     <div class="main">
         <div class="topbar">
-            <div class="toggle"><ion-icon name="menu-outline"></ion-icon></div>
+            <div class="toggle" onclick="toggleMenu()">
+                <ion-icon name="menu-outline"></ion-icon>
+            </div>
             <div class="search">
                 <label>
                     <ion-icon name="search-outline"></ion-icon>
@@ -134,8 +151,6 @@ while ($row = $result->fetch_assoc()) {
                 <img src="../user.jpg" />
             </div>
         </div>
-
-        
 
         <!-- Approved Users Table -->
         <div class="user-approval-list" style="margin-top: 40px;">
@@ -155,7 +170,6 @@ while ($row = $result->fetch_assoc()) {
                 </thead>
                 <tbody>
                 <?php
-                // Fetch all users from the user_login table
                 $query = "SELECT id, username, email, position, date_reg, 
                           CASE WHEN status = 0 THEN 'Offline' ELSE 'Online' END AS status 
                           FROM user_login";
@@ -190,34 +204,57 @@ while ($row = $result->fetch_assoc()) {
             </div>
             <table id="pendingTemporaryTable">
                 <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <?php
-                // Fetch pending temporary users from the database
-                $query = "SELECT temporary_id, temporary_username, temporary_email, temporary_position, 
-                          CASE WHEN temporary_status = 0 THEN 'Pending' ELSE 'Approved' END AS status 
-                          FROM temporary_login WHERE temporary_status = 0";
-                $result = $link->query($query);
+                    <?php
+                    // Query to fetch pending users from the registration_request table
+                    $query = "
+                        SELECT 
+                            r.user_id AS temporary_id,
+                            t.temp_username AS temporary_username,
+                            r.email AS temporary_email,
+                            p.position_name AS temporary_position,
+                            d.department_name AS department_name,
+                            CASE 
+                                WHEN r.status_id = 0 THEN 'Pending' 
+                                WHEN r.status_id = 1 THEN 'Approved' 
+                                ELSE 'Declined' 
+                            END AS status
+                        FROM registration_request r
+                        LEFT JOIN temporary_log_in t ON r.user_id = t.temp_user_id
+                        LEFT JOIN position_info p ON r.position_id = p.position_id
+                        LEFT JOIN department_info d ON r.department_id = d.department_id
+                        WHERE r.status_id = 0
+                    ";
+                    $result = $link->query($query);
 
-                while ($row = $result->fetch_assoc()) { ?>
-                    <tr>
-                        <td><?= htmlspecialchars($row['temporary_username']) ?></td>
-                        <td><?= htmlspecialchars($row['temporary_email']) ?></td>
-                        <td><?= htmlspecialchars($row['temporary_position']) ?></td>
-                        <td><?= htmlspecialchars($row['status']) ?></td>
-                        <td class="action-buttons">
-                            <a href="approve_user.php?id=<?= $row['temporary_id'] ?>" class="approve-btn" onclick="return confirm('Approve this temporary user?');">Approve</a>
-                            <a href="delete_user.php?id=<?= $row['temporary_id'] ?>" class="delete-btn" onclick="return confirm('Are you sure you to cancel this user?');">Decline</a>
-                        </td>
-                    </tr>
-                <?php } ?>
+                    // Check if there are rows to display
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) { ?>
+                            <tr>
+                                <td><?= htmlspecialchars($row['temporary_username']) ?></td>
+                                <td><?= htmlspecialchars($row['temporary_email']) ?></td>
+                                <td><?= htmlspecialchars($row['temporary_position']) ?></td>
+                                <td><?= htmlspecialchars($row['department_name']) ?></td>
+                                <td><?= htmlspecialchars($row['status']) ?></td>
+                                <td class="action-buttons">
+                                    <a href="approve_user.php?id=<?= $row['temporary_id'] ?>" class="approve-btn" onclick="return confirm('Approve this temporary user?');">Approve</a>
+                                    <a href="delete_user.php?id=<?= $row['temporary_id'] ?>" class="delete-btn" onclick="return confirm('Are you sure you want to cancel this user?');">Decline</a>
+                                </td>
+                            </tr>
+                        <?php }
+                    } else {
+                        echo "<tr><td colspan='6' style='text-align: center;'>No pending temporary users found.</td></tr>";
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
@@ -229,29 +266,47 @@ while ($row = $result->fetch_assoc()) {
             </div>
             <table id="approvedTemporaryTable">
                 <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                </tr>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                    </tr>
                 </thead>
                 <tbody>
-                <?php
-                // Fetch approved temporary users from the database
-                $query = "SELECT temporary_id, temporary_username, temporary_email, temporary_position, 
-                          CASE WHEN temporary_status = 1 THEN 'Approved' ELSE 'Pending' END AS status 
-                          FROM temporary_login WHERE temporary_status = 1";
-                $result = $link->query($query);
+                    <?php
+                    // Query to fetch approved temporary users
+                    $query = "
+                        SELECT 
+                            t.temp_user_id AS temporary_id,
+                            t.temp_username AS temporary_username,
+                            r.email AS temporary_email,
+                            p.position_name AS temporary_position,
+                            CASE 
+                                WHEN r.status_id = 1 THEN 'Approved' 
+                                ELSE 'Pending' 
+                            END AS status
+                        FROM registration_request r
+                        LEFT JOIN temporary_log_in t ON r.user_id = t.temp_user_id
+                        LEFT JOIN position_info p ON r.position_id = p.position_id
+                        WHERE r.status_id = 1
+                    ";
+                    $result = $link->query($query);
 
-                while ($row = $result->fetch_assoc()) { ?>
-                    <tr>
-                        <td><?= htmlspecialchars($row['temporary_username']) ?></td>
-                        <td><?= htmlspecialchars($row['temporary_email']) ?></td>
-                        <td><?= htmlspecialchars($row['temporary_position']) ?></td>
-                        <td><?= htmlspecialchars($row['status']) ?></td>
-                    </tr>
-                <?php } ?>
+                    // Check if there are rows to display
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) { ?>
+                            <tr>
+                                <td><?= htmlspecialchars($row['temporary_username']) ?></td>
+                                <td><?= htmlspecialchars($row['temporary_email']) ?></td>
+                                <td><?= htmlspecialchars($row['temporary_position']) ?></td>
+                                <td><?= htmlspecialchars($row['status']) ?></td>
+                            </tr>
+                        <?php }
+                    } else {
+                        echo "<tr><td colspan='4' style='text-align: center;'>No approved temporary users found.</td></tr>";
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
@@ -288,6 +343,11 @@ while ($row = $result->fetch_assoc()) {
 
 <!-- Scripts -->
 <script>
+    function toggleMenu() {
+        document.querySelector(".navigation").classList.toggle("active");
+        document.querySelector(".main").classList.toggle("active");
+    }
+
     function openEditModal(id, username, email, position, status) {
         document.getElementById("editModal").style.display = "block";
         document.getElementById("editUserId").value = id;
@@ -304,7 +364,6 @@ while ($row = $result->fetch_assoc()) {
     function sortTable(n, tableId) {
         const table = document.getElementById(tableId);
         let switching = true, dir = "asc", switchcount = 0;
-
         while (switching) {
             switching = false;
             const rows = table.rows;
@@ -333,7 +392,7 @@ while ($row = $result->fetch_assoc()) {
 
     function filterTables() {
         const input = document.getElementById("searchInput").value.toLowerCase();
-        const tables = ['pendingTable', 'approvedTable'];
+        const tables = ['pendingTemporaryTable', 'approvedTable', 'approvedTemporaryTable'];
         tables.forEach(tableId => {
             const rows = document.querySelectorAll(`#${tableId} tbody tr`);
             rows.forEach(row => {
